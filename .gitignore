@@ -1,0 +1,22 @@
+# Environment Variables & Secrets (Wajib diabaikan demi keamanan)
+.env
+.env.*
+!.env.example
+
+# Go binaries & build artifacts
+backend/bin/
+backend/*.exe
+backend/*.out
+backend/coverage.txt
+
+# Node / Frontend artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# IDE & OS files
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
