@@ -1,0 +1,48 @@
+# ==============================================================================
+# Docker Compose — Stateless Application Layer (Backend Go + Frontend Vue Nginx)
+# Terhubung ke Instance PostgreSQL Terpisah di Host (Best Practice Architecture)
+#
+# Cara menjalankan:
+#   1. Pastikan instance PostgreSQL berjalan di host (localhost:5432, db: ukt)
+#   2. Salin .env.example ke .env dan sesuaikan kredensial DB & HMAC secret
+#   3. Jalankan: docker compose up --build
+#   4. Buka UI: http://localhost:3000
+# ==============================================================================
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ukt_backend
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_PORT: 8080
+      # Terhubung langsung ke instance PostgreSQL terpisah di host mesin
+      DB_HOST: ${DOCKER_DB_HOST:-host.docker.internal}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-ukt}
+      DB_SSLMODE: ${DB_SSLMODE:-disable}
+      JWT_SECRET: ${JWT_SECRET:-change-this-jwt-secret-key-min-32-chars-2026}
+      JWT_TTL: ${JWT_TTL:-2h}
+      HMAC_SECRET_INST_1: ${HMAC_SECRET_INST_1}
+      HMAC_SECRET_INST_2: ${HMAC_SECRET_INST_2}
+      HMAC_SECRET_INST_3: ${HMAC_SECRET_INST_3}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ukt_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
